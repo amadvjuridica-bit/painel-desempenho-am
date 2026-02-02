@@ -1,6 +1,28 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+
+  async function handleLogin() {
+    setErro("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setErro("E-mail ou senha inválidos");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#0B1220] text-white flex items-center justify-center px-6">
       <div className="w-full max-w-md">
@@ -21,45 +43,50 @@ export default function Home() {
 
         <div className="rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur p-6">
           <h1 className="text-xl font-semibold">Entrar</h1>
-          <p className="text-sm text-white/70 mt-1">
-            Acesse com seu e-mail e senha.
-          </p>
 
-          <form className="mt-6 space-y-4">
+          <form
+            className="mt-6 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
             <div>
-              <label className="block text-sm text-white/80 mb-2">E-mail</label>
+              <label className="block text-sm mb-2">E-mail</label>
               <input
                 type="email"
-                placeholder="seuemail@empresa.com"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-white/20"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-white/80 mb-2">Senha</label>
+              <label className="block text-sm mb-2">Senha</label>
               <input
                 type="password"
-                placeholder="••••••••"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-white/20"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3"
               />
             </div>
 
+            {erro && (
+              <p className="text-red-400 text-sm text-center">{erro}</p>
+            )}
+
             <button
-              type="button"
-              className="w-full rounded-xl bg-white text-[#0B1220] font-medium py-3 hover:bg-white/90 transition"
+              type="submit"
+              className="w-full rounded-xl bg-white text-[#0B1220] font-medium py-3"
             >
               Entrar
             </button>
 
-            <p className="text-xs text-white/50 text-center mt-3">
-              * Recuperação de senha e criação de usuários somente pelo administrador.
+            <p className="text-xs text-white/50 text-center">
+              Criação e recuperação de senha somente pelo administrador.
             </p>
           </form>
         </div>
-
-        <p className="text-center text-xs text-white/40 mt-6">
-          © {new Date().getFullYear()} Assis & Mollerke
-        </p>
       </div>
     </main>
   );
